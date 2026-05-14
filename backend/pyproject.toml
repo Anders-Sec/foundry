@@ -1,0 +1,76 @@
+[project]
+name = "foundry"
+version = "0.1.0"
+description = "Open-core platform for managing custom detections and IR documentation"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "sqlalchemy[asyncio]>=2.0.36",
+  "asyncpg>=0.30.0",
+  "alembic>=1.14.0",
+  "pydantic>=2.10.0",
+  "pydantic-settings>=2.6.0",
+  "structlog>=24.4.0",
+  "argon2-cffi>=23.1.0",
+  "pyjwt>=2.10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.24.0",
+  "pytest-cov>=6.0.0",
+  "ruff>=0.8.0",
+  "mypy>=1.13.0",
+  "testcontainers[postgresql]>=4.8.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.24.0",
+  "pytest-cov>=6.0.0",
+  "ruff>=0.8.0",
+  "mypy>=1.13.0",
+  "testcontainers[postgresql]>=4.8.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "S", "A", "RUF"]
+ignore = [
+  "S101",  # assert — allowed in tests
+]
+fixable = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S105", "S106", "ANN"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_return_any = true
+no_implicit_optional = true
+strict = false
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+warn_return_any = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "--cov=app --cov-report=term-missing"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

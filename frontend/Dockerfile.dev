@@ -1,0 +1,17 @@
+FROM node:22.12-alpine
+
+WORKDIR /app
+
+# Install dependencies first (cached layer)
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy source (overridden by bind mount in Compose)
+COPY . .
+
+# Use the built-in non-root user from the official image
+USER node
+
+EXPOSE 5173
+
+# CMD is provided by compose.yaml (npm run dev -- --host 0.0.0.0)

@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:16.6-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      FOUNDRY_ENV: ${FOUNDRY_ENV}
+      FOUNDRY_LOG_LEVEL: ${FOUNDRY_LOG_LEVEL}
+      FOUNDRY_JWT_SECRET: ${FOUNDRY_JWT_SECRET}
+      FOUNDRY_DATABASE_URL: ${FOUNDRY_DATABASE_URL}
+    volumes:
+      - ./backend:/app
+      - backend-venv:/app/.venv
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      # Only VITE_* prefixed variables are exposed to the browser bundle.
+      # Never put secrets or backend credentials in VITE_* variables.
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+    ports:
+      - "127.0.0.1:5173:5173"
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  postgres-data:
+  backend-venv:
+  frontend-node-modules:
