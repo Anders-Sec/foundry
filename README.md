@@ -24,7 +24,32 @@ See [ADR-0001](docs/adr/0001-license-apache-2-open-core.md) and [ADR-0008](docs/
 
 ## Quickstart
 
-Local development bootstrap is in progress — see Phase 1. This section will be updated when the local development environment (Docker Compose, Makefile, pre-commit hooks) is available.
+**Prerequisites:** Docker 24+ with Compose v2, Make. Python and Node are **not** required on the host — they run inside containers.
+
+```bash
+git clone https://github.com/Anders-Sec/foundry.git
+cd foundry
+make bootstrap
+make up
+```
+
+| Service  | URL                    |
+| -------- | ---------------------- |
+| Frontend | http://localhost:5173  |
+| Backend  | http://localhost:8000  |
+| Postgres | localhost:5432         |
+
+`make bootstrap` copies `.env.example` to `.env`, pulls Docker images, builds dev containers, and installs pre-commit hooks. It is idempotent — safe to re-run.
+
+See [backend/README.md](backend/README.md) and [frontend/README.md](frontend/README.md) for component-level details.
+
+## Development
+
+All common tasks are available through `make`. Run `make help` to see the full list.
+
+Pre-commit hooks run automatically on every commit: secret scanning (gitleaks), DCO sign-off check, Conventional Commit format, ruff, mypy, eslint, and prettier. Run `make pre-commit` to run all hooks manually against every file.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution process.
 
 ## Architecture Overview
 
