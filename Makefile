@@ -1,5 +1,6 @@
 .PHONY: help bootstrap up down logs ps rebuild \
         backend-shell db-shell \
+        migrate migrate-down seed \
         lint format \
         test test-backend test-frontend \
         clean pre-commit
@@ -59,6 +60,17 @@ format: ## Auto-format all code (ruff, prettier)
 
 pre-commit: ## Run all pre-commit hooks against every file
 	pre-commit run --all-files
+
+## ─── Database ────────────────────────────────────────────────────────────────
+
+migrate: ## Apply all pending Alembic migrations
+	docker compose exec backend alembic upgrade head
+
+migrate-down: ## Roll back the last Alembic migration
+	docker compose exec backend alembic downgrade -1
+
+seed: ## Seed the database with development data (idempotent)
+	docker compose exec backend python -m app.seed
 
 ## ─── Tests ───────────────────────────────────────────────────────────────────
 
